@@ -1,0 +1,14 @@
+{
+  "expo": {
+    "name": "MUA Biodiversidad",
+    "slug": "mua-biodiversidad",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "platforms": ["web"],
+    "web": {
+      "bundler": "webpack",
+      "output": "static",
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}

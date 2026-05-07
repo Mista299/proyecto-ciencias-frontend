@@ -1,0 +1,52 @@
+{
+  "name": "mua-biodiversidad-frontend",
+  "version": "1.0.0",
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "web": "expo start --web",
+    "electron": "electron electron.js",
+    "dist": "PUBLIC_URL=. node_modules/.bin/expo export:web && node_modules/.bin/electron-builder --linux"
+  },
+  "build": {
+    "appId": "co.udea.mua.biodiversidad",
+    "productName": "MUA Biodiversidad",
+    "files": [
+      "electron.js",
+      "web-build/**/*"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "extraMetadata": {
+      "main": "electron.js"
+    },
+    "npmRebuild": false,
+    "linux": {
+      "target": "AppImage",
+      "category": "Science"
+    }
+  },
+  "dependencies": {
+    "@expo/webpack-config": "^19.0.1",
+    "axios": "^1.7.9",
+    "expo": "~52.0.36",
+    "expo-document-picker": "~13.0.2",
+    "expo-font": "~13.0.4",
+    "expo-status-bar": "~2.0.1",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-native": "0.76.9",
+    "react-native-svg": "15.8.0",
+    "react-native-web": "~0.19.13"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.2",
+    "@babel/preset-env": "^7.29.5",
+    "@types/react": "~18.3.12",
+    "electron": "^42.0.0",
+    "electron-builder": "^26.8.1",
+    "typescript": "^5.3.3"
+  },
+  "private": true
+}
