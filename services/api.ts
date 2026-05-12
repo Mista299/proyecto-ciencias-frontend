@@ -126,6 +126,11 @@ export const api = {
   deleteUser: (userId: string) =>
     http.delete(`/auth/users/${userId}`).then(r => r.data),
 
+  updateProfile: (data: { email?: string | null; current_password?: string; new_password?: string }) =>
+    http.patch<{ id: string; username: string; role: string; is_active: boolean; email?: string }>(
+      '/auth/me', data
+    ).then(r => r.data),
+
   exportOccurrences: async (filters: OccurrenceFilter = {}) => {
     const { data } = await http.get<Blob>('/occurrences/export', {
       params: filters,

@@ -6,12 +6,14 @@ export interface StoredAuth {
   access_token: string;
   role: 'admin' | 'user';
   username: string;
+  email?: string;
 }
 
 interface AuthContextValue {
   user: StoredAuth | null;
   login: (u: StoredAuth) => void;
   logout: () => void;
+  updateUser: (patch: Partial<Pick<StoredAuth, 'email'>>) => void;
   isAdmin: boolean;
 }
 
@@ -39,6 +41,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   }, []);
 
+  const updateUser = useCallback((patch: Partial<Pick<StoredAuth, 'email'>>) => {
+    setUser(prev => {
+      if (!prev) return prev;
+      const next = { ...prev, ...patch };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
   useEffect(() => {
     const handler = () => logout();
     window.addEventListener('mua:logout', handler);
@@ -46,7 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [logout]);
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAdmin: user?.role === 'admin' }}>
+    <AuthContext.Provider value={{ user, login, logout, updateUser, isAdmin: user?.role === 'admin' }}>
       {children}
     </AuthContext.Provider>
   );
