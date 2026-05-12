@@ -5,26 +5,41 @@ import { Sidebar, Screen } from './components/Sidebar';
 import { Dashboard } from './screens/Dashboard';
 import { Upload } from './screens/Upload';
 import { Records } from './screens/Records';
+import { Login } from './screens/Login';
+import { AdminPanel } from './screens/AdminPanel';
 import { Colors } from './constants/theme';
 import { ToastProvider } from './context/ToastContext';
 import { ToastContainer } from './components/ToastContainer';
+import { AuthProvider, useAuth } from './context/AuthContext';
 
-export default function App() {
+function AppShell() {
+  const { user } = useAuth();
   const [screen, setScreen] = useState<Screen>('dashboard');
 
+  if (!user) return <Login />;
+
   return (
-    <ToastProvider>
-      <View style={styles.root}>
-        <StatusBar style="light" />
-        <Sidebar active={screen} onChange={setScreen} />
-        <View style={styles.main}>
-          {screen === 'dashboard' && <Dashboard />}
-          {screen === 'upload'    && <Upload />}
-          {screen === 'records'   && <Records />}
-        </View>
-        <ToastContainer />
+    <View style={styles.root}>
+      <StatusBar style="light" />
+      <Sidebar active={screen} onChange={setScreen} />
+      <View style={styles.main}>
+        {screen === 'dashboard' && <Dashboard />}
+        {screen === 'upload'    && <Upload />}
+        {screen === 'records'   && <Records />}
+        {screen === 'admin'     && <AdminPanel />}
       </View>
-    </ToastProvider>
+      <ToastContainer />
+    </View>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <ToastProvider>
+        <AppShell />
+      </ToastProvider>
+    </AuthProvider>
   );
 }
 

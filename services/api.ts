@@ -1,8 +1,33 @@
 import axios from 'axios';
-import { Occurrence, QualityStats, MappingReport, ETLResult, TaxonResumen } from './types';
+import { Occurrence, QualityStats, MappingReport, ETLResult, TaxonResumen, AuthUser, UserRecord } from './types';
 
+const STORAGE_KEY = 'mua_auth_token';
 const BASE = 'http://localhost:8000';
 const http = axios.create({ baseURL: BASE });
+
+http.interceptors.request.use(config => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed?.access_token) {
+        (config.headers as any)['Authorization'] = `Bearer ${parsed.access_token}`;
+      }
+    }
+  } catch {}
+  return config;
+});
+
+http.interceptors.response.use(
+  r => r,
+  err => {
+    if (err.response?.status === 401) {
+      localStorage.removeItem(STORAGE_KEY);
+      window.dispatchEvent(new Event('mua:logout'));
+    }
+    return Promise.reject(err);
+  }
+);
 
 export type OccurrenceFilter = {
   collection_code?: string;
@@ -82,4 +107,22 @@ export const api = {
 
   updateIdentification: (id: string, data: object) =>
     http.patch<Occurrence>(`/occurrences/${id}/identification`, data).then(r => r.data),
+
+  login: (username: string, password: string) => {
+    const form = new URLSearchParams();
+    form.append('username', username);
+    form.append('password', password);
+    return http.post<AuthUser>('/auth/login', form, {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    }).then(r => r.data);
+  },
+
+  listUsers: () =>
+    http.get<UserRecord[]>('/auth/users').then(r => r.data),
+
+  createUser: (data: { username: string; password: string; role: string }) =>
+    http.post<UserRecord>('/auth/users', data).then(r => r.data),
+
+  deleteUser: (userId: string) =>
+    http.delete(`/auth/users/${userId}`).then(r => r.data),
 };

@@ -70,3 +70,17 @@ export interface TaxonResumen {
   por_familia: { familia: string; count: number }[];
   por_orden:   { orden: string; count: number }[];
 }
+
+export interface AuthUser {
+  access_token: string;
+  token_type:   string;
+  role:         'admin' | 'user';
+  username:     string;
+}
+
+export interface UserRecord {
+  id:        string;
+  username:  string;
+  role:      'admin' | 'user';
+  is_active: boolean;
+}

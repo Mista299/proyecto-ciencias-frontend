@@ -1,19 +1,22 @@
 import React, { useState } from 'react';
-import { View, Text, Pressable, StyleSheet, Animated } from 'react-native';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { Colors, Fonts, Radius, Space } from '../constants/theme';
+import { useAuth } from '../context/AuthContext';
 
-export type Screen = 'dashboard' | 'upload' | 'records';
+export type Screen = 'dashboard' | 'upload' | 'records' | 'admin';
 
 interface NavItem {
   id: Screen;
   icon: string;
   label: string;
+  adminOnly?: boolean;
 }
 
 const NAV: NavItem[] = [
   { id: 'dashboard', icon: '◈', label: 'Panorama' },
   { id: 'upload',    icon: '⬆', label: 'Cargar archivo' },
   { id: 'records',   icon: '⊞', label: 'Explorador' },
+  { id: 'admin',     icon: '⚙', label: 'Administración', adminOnly: true },
 ];
 
 interface SidebarProps {
@@ -23,7 +26,10 @@ interface SidebarProps {
 
 export function Sidebar({ active, onChange }: SidebarProps) {
   const [hovered, setHovered] = useState(false);
+  const { user, logout, isAdmin } = useAuth();
   const width = hovered ? 232 : 64;
+
+  const visibleNav = NAV.filter(item => !item.adminOnly || isAdmin);
 
   return (
     <View
@@ -43,7 +49,7 @@ export function Sidebar({ active, onChange }: SidebarProps) {
       <View style={styles.divider} />
 
       {/* Nav items */}
-      {NAV.map(item => {
+      {visibleNav.map(item => {
         const isActive = active === item.id;
         return (
           <Pressable
@@ -65,11 +71,26 @@ export function Sidebar({ active, onChange }: SidebarProps) {
 
       <View style={{ flex: 1 }} />
 
-      {/* Footer */}
+      {/* Footer: user + logout */}
       <View style={styles.footer}>
         <View style={styles.avatarDot} />
-        {hovered && <Text style={styles.footerText}>CIUA · v1.0</Text>}
+        {hovered && (
+          <View style={styles.footerRight}>
+            <Text style={styles.footerUser}>{user?.username ?? ''}</Text>
+            <Text style={styles.footerRole}>{user?.role}</Text>
+          </View>
+        )}
       </View>
+
+      <Pressable
+        style={styles.logoutBtn}
+        onPress={logout}
+        // @ts-ignore
+        title="Cerrar sesión"
+      >
+        <Text style={styles.logoutIcon}>⏻</Text>
+        {hovered && <Text style={styles.logoutText}>Cerrar sesión</Text>}
+      </Pressable>
     </View>
   );
 }
@@ -80,8 +101,8 @@ const styles = StyleSheet.create({
     height: '100%' as any,
     paddingVertical: Space.lg,
     overflow: 'hidden',
-    transition: 'width 0.2s ease' as any,
-  },
+    transition: 'width 0.2s ease',
+  } as any,
   logoRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -153,6 +174,7 @@ const styles = StyleSheet.create({
     paddingTop: Space.md,
     borderTopWidth: 1,
     borderTopColor: 'rgba(255,255,255,0.08)',
+    marginBottom: 4,
   },
   avatarDot: {
     width: 8,
@@ -160,9 +182,37 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: Colors.greenSoft,
   },
-  footerText: {
-    fontSize: 11,
+  footerRight: { gap: 1 },
+  footerUser: {
+    fontSize: 12,
+    color: Colors.cream,
+    fontFamily: Fonts.sans,
+    fontWeight: '600',
+  },
+  footerRole: {
+    fontSize: 10,
     color: 'rgba(255,255,255,0.35)',
     fontFamily: Fonts.mono,
+  },
+  logoutBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Space.sm,
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    marginHorizontal: 8,
+    borderRadius: Radius.md,
+    marginBottom: 2,
+  },
+  logoutIcon: {
+    fontSize: 16,
+    width: 24,
+    textAlign: 'center',
+    color: 'rgba(255,255,255,0.35)',
+  },
+  logoutText: {
+    fontSize: 12,
+    fontFamily: Fonts.sans,
+    color: 'rgba(255,255,255,0.4)',
   },
 });
