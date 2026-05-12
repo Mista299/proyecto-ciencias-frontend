@@ -83,4 +83,5 @@ export interface UserRecord {
   username:  string;
   role:      'admin' | 'user';
   is_active: boolean;
+  email?:    string;
 }

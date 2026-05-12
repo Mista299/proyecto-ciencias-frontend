@@ -57,13 +57,17 @@ export default function App() {
 
 const styles = StyleSheet.create({
   root: {
-    flex: 1,
+    position: 'fixed' as any,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     flexDirection: 'row',
     backgroundColor: Colors.bg,
-    height: '100vh' as any,
   },
   main: {
     flex: 1,
-    overflow: 'hidden',
+    overflow: 'hidden' as any,
+    flexDirection: 'column' as any,
   },
 });

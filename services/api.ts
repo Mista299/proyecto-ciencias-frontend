@@ -120,8 +120,16 @@ export const api = {
   listUsers: () =>
     http.get<UserRecord[]>('/auth/users').then(r => r.data),
 
-  createUser: (data: { username: string; password: string; role: string }) =>
-    http.post<UserRecord>('/auth/users', data).then(r => r.data),
+  createUser: (data: { username: string; email: string; role: string }) =>
+    http.post<{ id: string; username: string; role: string; verify_token?: string; temp_password?: string }>(
+      '/auth/users', data
+    ).then(r => r.data),
+
+  forgotPassword: (email: string) =>
+    http.post<{ message: string; reset_token?: string }>('/auth/forgot-password', { email }).then(r => r.data),
+
+  resetPassword: (token: string, new_password: string) =>
+    http.post<{ message: string }>('/auth/reset-password', { token, new_password }).then(r => r.data),
 
   deleteUser: (userId: string) =>
     http.delete(`/auth/users/${userId}`).then(r => r.data),

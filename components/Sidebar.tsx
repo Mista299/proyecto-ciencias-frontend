@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Text, Pressable, StyleSheet, ScrollView } from 'react-native';
 import { Colors, Fonts, Radius, Space } from '../constants/theme';
 import { useAuth } from '../context/AuthContext';
 import { NavIcon, NavIconName } from './NavIcon';
 
-export type Screen = 'dashboard' | 'upload' | 'records' | 'admin' | 'taxonomia' | 'cartografia' | 'settings';
+export type Screen =
+  | 'dashboard' | 'upload' | 'records' | 'admin'
+  | 'taxonomia' | 'cartografia' | 'settings';
 
 interface NavItem {
   id: Screen;
@@ -43,7 +45,7 @@ export function Sidebar({ active, onChange }: SidebarProps) {
   const visibleMain = NAV_MAIN.filter(item => !item.adminOnly || isAdmin);
 
   function NavBtn({ item }: { item: NavItem }) {
-    const isActive = active === item.id;
+    const isActive  = active === item.id;
     const iconColor = isActive ? Colors.lime : 'rgba(255,255,255,0.45)';
     return (
       <Pressable
@@ -65,7 +67,7 @@ export function Sidebar({ active, onChange }: SidebarProps) {
   return (
     <View
       style={[styles.sidebar, { width }]}
-      // @ts-ignore — web-only props
+      // @ts-ignore
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
@@ -79,50 +81,51 @@ export function Sidebar({ active, onChange }: SidebarProps) {
 
       <View style={styles.divider} />
 
-      {/* Main nav */}
-      {visibleMain.map(item => <NavBtn key={item.id} item={item} />)}
+      {/* Nav items scrollables */}
+      <ScrollView
+        style={{ flex: 1, minHeight: 0 } as any}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: Space.sm }}
+      >
+        {visibleMain.map(item => <NavBtn key={item.id} item={item} />)}
+        <View style={[styles.divider, { marginTop: Space.sm }]} />
+        {hovered && <Text style={styles.sectionLabel}>Catálogos</Text>}
+        {NAV_CATALOGOS.map(item => <NavBtn key={item.id} item={item} />)}
+      </ScrollView>
 
-      {/* Catálogos section */}
-      <View style={[styles.divider, { marginTop: Space.sm }]} />
-      {hovered && <Text style={styles.sectionLabel}>Catálogos</Text>}
-      {NAV_CATALOGOS.map(item => <NavBtn key={item.id} item={item} />)}
-
-      <View style={{ flex: 1 }} />
-
-      {/* Settings */}
-      <NavBtn item={{ id: 'settings', icon: 'sliders', label: 'Configuración' }} />
-
-      <View style={styles.divider} />
-
-      {/* Footer: avatar + user info */}
-      <View style={styles.footer}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{getInitials(user?.username ?? '')}</Text>
-        </View>
-        {hovered && (
-          <View style={styles.footerRight}>
-            <Text style={styles.footerUser}>{user?.username ?? ''}</Text>
-            <Text style={styles.footerRole}>{user?.role}</Text>
+      {/* Footer fijo */}
+      <View>
+        <NavBtn item={{ id: 'settings', icon: 'sliders', label: 'Configuración' }} />
+        <View style={styles.divider} />
+        <View style={styles.footer}>
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>{getInitials(user?.username ?? '')}</Text>
           </View>
-        )}
-      </View>
-
-      {/* Logout */}
-      <Pressable style={styles.navItem} onPress={logout}>
-        <View style={styles.iconWrap}>
-          <NavIcon name="log-out" size={18} color="rgba(255,255,255,0.35)" />
+          {hovered && (
+            <View style={styles.footerRight}>
+              <Text style={styles.footerUser}>{user?.username ?? ''}</Text>
+              <Text style={styles.footerRole}>{user?.role}</Text>
+            </View>
+          )}
         </View>
-        {hovered && <Text style={styles.logoutText}>Cerrar sesión</Text>}
-      </Pressable>
+        <Pressable style={styles.navItem} onPress={logout}>
+          <View style={styles.iconWrap}>
+            <NavIcon name="log-out" size={18} color="rgba(255,255,255,0.35)" />
+          </View>
+          {hovered && <Text style={styles.logoutText}>Cerrar sesión</Text>}
+        </Pressable>
+        <View style={{ height: Space.sm }} />
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   sidebar: {
-    backgroundColor: Colors.greenDeeper,
     height: '100%' as any,
-    paddingVertical: Space.lg,
+    flexDirection: 'column',
+    backgroundColor: Colors.greenDeeper,
+    paddingTop: Space.lg,
     overflow: 'hidden',
     transition: 'width 0.2s ease',
   } as any,
@@ -134,18 +137,13 @@ const styles = StyleSheet.create({
     gap: Space.sm,
   },
   logoIcon: {
-    width: 32,
-    height: 32,
+    width: 32, height: 32,
     borderRadius: Radius.sm,
     backgroundColor: Colors.lime,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  logoGlyph: {
-    fontSize: 16,
-    color: Colors.greenDeeper,
-    fontWeight: '700',
-  },
+  logoGlyph: { fontSize: 16, color: Colors.greenDeeper, fontWeight: '700' },
   logoText: {
     color: Colors.cream,
     fontFamily: Fonts.serif,
@@ -158,34 +156,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 12,
     marginBottom: Space.sm,
   },
-  navItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Space.sm,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    marginHorizontal: 8,
-    borderRadius: Radius.md,
-    marginBottom: 2,
-  },
-  navItemActive: {
-    backgroundColor: 'rgba(197,216,109,0.15)',
-  },
-  iconWrap: {
-    width: 24,
-    height: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  navLabel: {
-    fontSize: 13,
-    fontFamily: Fonts.sans,
-    color: 'rgba(255,255,255,0.6)',
-  },
-  navLabelActive: {
-    color: Colors.cream,
-    fontWeight: '600',
-  },
   sectionLabel: {
     fontSize: 9,
     fontFamily: Fonts.sans,
@@ -197,6 +167,28 @@ const styles = StyleSheet.create({
     paddingBottom: 4,
     paddingTop: 2,
   },
+  navItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Space.sm,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    marginHorizontal: 8,
+    borderRadius: Radius.md,
+    marginBottom: 2,
+  },
+  navItemActive: { backgroundColor: 'rgba(197,216,109,0.15)' },
+  iconWrap: {
+    width: 24, height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  navLabel: {
+    fontSize: 13,
+    fontFamily: Fonts.sans,
+    color: 'rgba(255,255,255,0.6)',
+  },
+  navLabelActive: { color: Colors.cream, fontWeight: '600' },
   footer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -208,25 +200,21 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   avatar: {
-    width: 28,
-    height: 28,
+    width: 28, height: 28,
     borderRadius: 14,
     backgroundColor: Colors.lime,
     alignItems: 'center',
     justifyContent: 'center',
   },
   avatarText: {
-    fontSize: 11,
-    fontWeight: '700',
+    fontSize: 11, fontWeight: '700',
     color: Colors.greenDeeper,
     fontFamily: Fonts.sans,
   },
   footerRight: { gap: 1 },
   footerUser: {
-    fontSize: 12,
-    color: Colors.cream,
-    fontFamily: Fonts.sans,
-    fontWeight: '600',
+    fontSize: 12, color: Colors.cream,
+    fontFamily: Fonts.sans, fontWeight: '600',
   },
   footerRole: {
     fontSize: 10,

@@ -315,37 +315,40 @@ export function Records() {
         <Text style={[styles.colHead, { width: 120 }]}>Estado</Text>
       </View>
 
-      {loading ? (
-        <View style={styles.center}>
-          <ActivityIndicator color={Colors.greenDeep} />
-          <Text style={styles.loadText}>Cargando registros…</Text>
-        </View>
-      ) : error ? (
-        <View style={styles.center}>
-          <Text style={styles.errorText}>{error}</Text>
-        </View>
-      ) : (
-        <FlatList
-          data={data}
-          keyExtractor={item => item.occurrenceID}
-          renderItem={({ item }) => (
-            <OccurrenceRow occ={item} onPress={() => setSelected(item)} />
-          )}
-          ItemSeparatorComponent={() => <View style={styles.sep} />}
-          onEndReached={() => { if (hasMore && !loadingMore) load(false); }}
-          onEndReachedThreshold={0.3}
-          ListFooterComponent={loadingMore ? (
-            <View style={styles.footerLoad}>
-              <ActivityIndicator size="small" color={Colors.greenDeep} />
-            </View>
-          ) : null}
-          ListEmptyComponent={
-            <View style={styles.center}>
-              <Text style={styles.emptyText}>Sin resultados para esta búsqueda.</Text>
-            </View>
-          }
-        />
-      )}
+      <View style={styles.listArea}>
+        {loading ? (
+          <View style={styles.center}>
+            <ActivityIndicator color={Colors.greenDeep} />
+            <Text style={styles.loadText}>Cargando registros…</Text>
+          </View>
+        ) : error ? (
+          <View style={styles.center}>
+            <Text style={styles.errorText}>{error}</Text>
+          </View>
+        ) : (
+          <FlatList
+            data={data}
+            keyExtractor={item => item.occurrenceID}
+            style={{ flex: 1 }}
+            renderItem={({ item }) => (
+              <OccurrenceRow occ={item} onPress={() => setSelected(item)} />
+            )}
+            ItemSeparatorComponent={() => <View style={styles.sep} />}
+            onEndReached={() => { if (hasMore && !loadingMore) load(false); }}
+            onEndReachedThreshold={0.3}
+            ListFooterComponent={loadingMore ? (
+              <View style={styles.footerLoad}>
+                <ActivityIndicator size="small" color={Colors.greenDeep} />
+              </View>
+            ) : null}
+            ListEmptyComponent={
+              <View style={styles.center}>
+                <Text style={styles.emptyText}>Sin resultados para esta búsqueda.</Text>
+              </View>
+            }
+          />
+        )}
+      </View>
 
       <SpecimenModal
         occurrence={selected}
@@ -363,7 +366,8 @@ export function Records() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: Colors.bg },
+  root: { flex: 1, backgroundColor: Colors.bg, overflow: 'hidden' as any },
+  listArea: { flex: 1, minHeight: 0 } as any,
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: Space.sm, paddingVertical: Space.xl },
   loadText: { fontSize: 13, color: Colors.ink3, fontFamily: Fonts.sans },
   errorText: { fontSize: 13, color: Colors.error, fontFamily: Fonts.sans },

@@ -16,7 +16,7 @@ export function AdminPanel() {
   const [users, setUsers]           = useState<UserRecord[]>([]);
   const [loading, setLoading]       = useState(true);
   const [newUsername, setNewUsername] = useState('');
-  const [newPassword, setNewPassword] = useState('');
+  const [newEmail, setNewEmail]     = useState('');
   const [newRole, setNewRole]       = useState<'admin' | 'user'>('user');
   const [creating, setCreating]     = useState(false);
 
@@ -35,16 +35,16 @@ export function AdminPanel() {
   useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
   async function handleCreate() {
-    if (!newUsername.trim() || !newPassword.trim()) {
-      show('Completa usuario y contraseña', 'warning');
+    if (!newUsername.trim() || !newEmail.trim()) {
+      show('Completa usuario y correo electrónico', 'warning');
       return;
     }
     setCreating(true);
     try {
-      await api.createUser({ username: newUsername.trim(), password: newPassword, role: newRole });
-      show(`Usuario '${newUsername.trim()}' creado`, 'success');
+      await api.createUser({ username: newUsername.trim(), email: newEmail.trim(), role: newRole });
+      show(`Invitación enviada a ${newEmail.trim()}`, 'success');
       setNewUsername('');
-      setNewPassword('');
+      setNewEmail('');
       setNewRole('user');
       fetchUsers();
     } catch (e: any) {
@@ -87,14 +87,16 @@ export function AdminPanel() {
               />
             </View>
             <View style={styles.field}>
-              <Text style={styles.label}>Contraseña</Text>
+              <Text style={styles.label}>Correo electrónico</Text>
               <TextInput
                 style={styles.input}
-                value={newPassword}
-                onChangeText={setNewPassword}
-                placeholder="••••••••"
+                value={newEmail}
+                onChangeText={setNewEmail}
+                placeholder="usuario@correo.com"
                 placeholderTextColor={Colors.ink3}
-                secureTextEntry
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
               />
             </View>
             <View style={styles.fieldNarrow}>
@@ -141,6 +143,7 @@ export function AdminPanel() {
             <View style={styles.table}>
               <View style={styles.tableHeader}>
                 <Text style={[styles.colUsername, styles.headerCell]}>Usuario</Text>
+                <Text style={[styles.colEmail,    styles.headerCell]}>Correo</Text>
                 <Text style={[styles.colRole,     styles.headerCell]}>Rol</Text>
                 <Text style={[styles.colStatus,   styles.headerCell]}>Estado</Text>
                 <Text style={[styles.colAction,   styles.headerCell]} />
@@ -151,6 +154,7 @@ export function AdminPanel() {
                 return (
                   <View key={u.id} style={styles.tableRow}>
                     <Text style={[styles.colUsername, styles.cell]}>{u.username}</Text>
+                    <Text style={[styles.colEmail, styles.cellMono]} numberOfLines={1}>{u.email ?? '—'}</Text>
                     <View style={styles.colRole}>
                       <View style={[styles.roleBadge, u.role === 'admin' && styles.roleBadgeAdmin]}>
                         <Text style={[styles.roleBadgeText, u.role === 'admin' && styles.roleBadgeTextAdmin]}>
@@ -160,7 +164,7 @@ export function AdminPanel() {
                     </View>
                     <View style={styles.colStatus}>
                       <View style={[styles.statusDot, !u.is_active && styles.statusDotOff]} />
-                      <Text style={styles.cell}>{u.is_active ? 'Activo' : 'Inactivo'}</Text>
+                      <Text style={styles.cell}>{u.is_active ? 'Activo' : 'Pendiente'}</Text>
                     </View>
                     <View style={styles.colAction}>
                       {!isSelf && (
@@ -294,9 +298,11 @@ const styles = StyleSheet.create({
   },
   cell: { fontSize: 13, fontFamily: Fonts.sans, color: Colors.ink },
   colUsername: { flex: 2 },
+  colEmail:    { flex: 3 },
   colRole:     { flex: 1, flexDirection: 'row', alignItems: 'center' },
   colStatus:   { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6 },
   colAction:   { width: 80, alignItems: 'flex-end' },
+  cellMono:    { fontSize: 12, fontFamily: 'monospace', color: Colors.ink3 },
 
   roleBadge: {
     paddingHorizontal: 8,
