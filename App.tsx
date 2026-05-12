@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Sidebar, Screen } from './components/Sidebar';
@@ -7,14 +7,23 @@ import { Upload } from './screens/Upload';
 import { Records } from './screens/Records';
 import { Login } from './screens/Login';
 import { AdminPanel } from './screens/AdminPanel';
+import { Taxonomia } from './screens/Taxonomia';
+import { Cartografia } from './screens/Cartografia';
+import { Settings } from './screens/Settings';
 import { Colors } from './constants/theme';
 import { ToastProvider } from './context/ToastContext';
 import { ToastContainer } from './components/ToastContainer';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 function AppShell() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [screen, setScreen] = useState<Screen>('dashboard');
+
+  useEffect(() => {
+    if (!isAdmin && screen === 'admin') {
+      setScreen('dashboard');
+    }
+  }, [user, isAdmin]);
 
   if (!user) return <Login />;
 
@@ -23,10 +32,13 @@ function AppShell() {
       <StatusBar style="light" />
       <Sidebar active={screen} onChange={setScreen} />
       <View style={styles.main}>
-        {screen === 'dashboard' && <Dashboard />}
-        {screen === 'upload'    && <Upload />}
-        {screen === 'records'   && <Records />}
-        {screen === 'admin'     && <AdminPanel />}
+        {screen === 'dashboard'  && <Dashboard />}
+        {screen === 'upload'     && <Upload />}
+        {screen === 'records'    && <Records />}
+        {screen === 'admin'      && isAdmin && <AdminPanel />}
+        {screen === 'taxonomia'  && <Taxonomia />}
+        {screen === 'cartografia'&& <Cartografia />}
+        {screen === 'settings'   && <Settings />}
       </View>
       <ToastContainer />
     </View>

@@ -125,4 +125,19 @@ export const api = {
 
   deleteUser: (userId: string) =>
     http.delete(`/auth/users/${userId}`).then(r => r.data),
+
+  exportOccurrences: async (filters: OccurrenceFilter = {}) => {
+    const { data } = await http.get<Blob>('/occurrences/export', {
+      params: filters,
+      responseType: 'blob',
+    });
+    const url = URL.createObjectURL(new Blob([data], { type: 'text/csv' }));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'especimenes.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  },
 };

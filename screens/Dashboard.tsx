@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, ActivityIndicator, Pressable } from 'react-native';
 import { Colors, Fonts, Radius, Space } from '../constants/theme';
 import { TopBar } from '../components/TopBar';
 import { api } from '../services/api';
@@ -27,6 +27,42 @@ function CompletitudBar({ label, pct, count }: { label: string; pct: number; cou
       <Text style={styles.barCount}>{count}</Text>
     </View>
   );
+}
+
+function downloadReport(quality: QualityStats, taxa: TaxonResumen) {
+  const rows: (string | number)[][] = [
+    ['Reporte de colección MUA Biodiversidad'],
+    ['Generado', new Date().toLocaleString('es-CO')],
+    [],
+    ['RESUMEN GENERAL'],
+    ['Total registros', quality.total_registros],
+    ['Total taxones', taxa.total_taxones],
+    ['Total familias', taxa.por_familia.length],
+    [],
+    ['POR COLECCIÓN'],
+    ...Object.entries(quality.por_coleccion).map(([k, v]) => [k, v]),
+    [],
+    ['COMPLETITUD DE DATOS'],
+    ['Campo', 'Cantidad', 'Porcentaje'],
+    ['Nombre científico', quality.completitud.con_nombre_cientifico.cantidad, quality.completitud.con_nombre_cientifico.porcentaje.toFixed(1) + '%'],
+    ['Coordenadas',       quality.completitud.con_coordenadas.cantidad,       quality.completitud.con_coordenadas.porcentaje.toFixed(1) + '%'],
+    ['Fecha de evento',   quality.completitud.con_fecha_evento.cantidad,       quality.completitud.con_fecha_evento.porcentaje.toFixed(1) + '%'],
+    ['País',              quality.completitud.con_pais.cantidad,               quality.completitud.con_pais.porcentaje.toFixed(1) + '%'],
+    [],
+    ['TOP FAMILIAS'],
+    ['Familia', 'Registros'],
+    ...taxa.por_familia.slice(0, 15).map(f => [f.familia || '(sin familia)', f.count]),
+  ];
+  const csv = '﻿' + rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'reporte_coleccion.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 export function Dashboard() {
@@ -61,6 +97,11 @@ export function Dashboard() {
   return (
     <View style={styles.root}>
       <TopBar title="Panorama" subtitle={`${quality!.total_registros.toLocaleString()} registros en la colección`} />
+      <View style={styles.actionBar}>
+        <Pressable style={styles.actionBtn} onPress={() => downloadReport(quality!, taxa!)}>
+          <Text style={styles.actionBtnText}>↓ Exportar reporte</Text>
+        </Pressable>
+      </View>
       <ScrollView contentContainerStyle={styles.content}>
 
         {/* Summary cards */}
@@ -133,6 +174,29 @@ export function Dashboard() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.bg },
+  actionBar: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingHorizontal: Space.xl,
+    paddingVertical: Space.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.line,
+    backgroundColor: Colors.surface,
+  },
+  actionBtn: {
+    paddingVertical: 6,
+    paddingHorizontal: Space.md,
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    borderColor: Colors.line,
+    backgroundColor: Colors.surface2,
+  },
+  actionBtnText: {
+    fontSize: 12,
+    fontFamily: Fonts.sans,
+    fontWeight: '600',
+    color: Colors.ink2,
+  },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: Space.md },
   loadingText: { fontSize: 13, color: Colors.ink3, fontFamily: Fonts.sans },
   errorBox: {

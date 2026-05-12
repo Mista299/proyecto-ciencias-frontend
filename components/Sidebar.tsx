@@ -2,22 +2,33 @@ import React, { useState } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { Colors, Fonts, Radius, Space } from '../constants/theme';
 import { useAuth } from '../context/AuthContext';
+import { NavIcon, NavIconName } from './NavIcon';
 
-export type Screen = 'dashboard' | 'upload' | 'records' | 'admin';
+export type Screen = 'dashboard' | 'upload' | 'records' | 'admin' | 'taxonomia' | 'cartografia' | 'settings';
 
 interface NavItem {
   id: Screen;
-  icon: string;
+  icon: NavIconName;
   label: string;
   adminOnly?: boolean;
 }
 
-const NAV: NavItem[] = [
-  { id: 'dashboard', icon: '◈', label: 'Panorama' },
-  { id: 'upload',    icon: '⬆', label: 'Cargar archivo' },
-  { id: 'records',   icon: '⊞', label: 'Explorador' },
-  { id: 'admin',     icon: '⚙', label: 'Administración', adminOnly: true },
+const NAV_MAIN: NavItem[] = [
+  { id: 'dashboard', icon: 'grid',         label: 'Panorama' },
+  { id: 'upload',    icon: 'upload-cloud', label: 'Cargar archivo' },
+  { id: 'records',   icon: 'list',         label: 'Explorador' },
+  { id: 'admin',     icon: 'users',        label: 'Administración', adminOnly: true },
 ];
+
+const NAV_CATALOGOS: NavItem[] = [
+  { id: 'taxonomia',   icon: 'layers',  label: 'Taxonomía' },
+  { id: 'cartografia', icon: 'map-pin', label: 'Cartografía' },
+];
+
+function getInitials(username: string): string {
+  const parts = username.split(/[\s._-]+/).filter(Boolean);
+  return parts.slice(0, 2).map(p => p[0]?.toUpperCase() ?? '').join('') || '?';
+}
 
 interface SidebarProps {
   active: Screen;
@@ -29,7 +40,27 @@ export function Sidebar({ active, onChange }: SidebarProps) {
   const { user, logout, isAdmin } = useAuth();
   const width = hovered ? 232 : 64;
 
-  const visibleNav = NAV.filter(item => !item.adminOnly || isAdmin);
+  const visibleMain = NAV_MAIN.filter(item => !item.adminOnly || isAdmin);
+
+  function NavBtn({ item }: { item: NavItem }) {
+    const isActive = active === item.id;
+    const iconColor = isActive ? Colors.lime : 'rgba(255,255,255,0.45)';
+    return (
+      <Pressable
+        style={[styles.navItem, isActive && styles.navItemActive]}
+        onPress={() => onChange(item.id)}
+      >
+        <View style={styles.iconWrap}>
+          <NavIcon name={item.icon} size={18} color={iconColor} />
+        </View>
+        {hovered && (
+          <Text style={[styles.navLabel, isActive && styles.navLabelActive]}>
+            {item.label}
+          </Text>
+        )}
+      </Pressable>
+    );
+  }
 
   return (
     <View
@@ -48,32 +79,26 @@ export function Sidebar({ active, onChange }: SidebarProps) {
 
       <View style={styles.divider} />
 
-      {/* Nav items */}
-      {visibleNav.map(item => {
-        const isActive = active === item.id;
-        return (
-          <Pressable
-            key={item.id}
-            style={[styles.navItem, isActive && styles.navItemActive]}
-            onPress={() => onChange(item.id)}
-          >
-            <Text style={[styles.navIcon, isActive && styles.navIconActive]}>
-              {item.icon}
-            </Text>
-            {hovered && (
-              <Text style={[styles.navLabel, isActive && styles.navLabelActive]}>
-                {item.label}
-              </Text>
-            )}
-          </Pressable>
-        );
-      })}
+      {/* Main nav */}
+      {visibleMain.map(item => <NavBtn key={item.id} item={item} />)}
+
+      {/* Catálogos section */}
+      <View style={[styles.divider, { marginTop: Space.sm }]} />
+      {hovered && <Text style={styles.sectionLabel}>Catálogos</Text>}
+      {NAV_CATALOGOS.map(item => <NavBtn key={item.id} item={item} />)}
 
       <View style={{ flex: 1 }} />
 
-      {/* Footer: user + logout */}
+      {/* Settings */}
+      <NavBtn item={{ id: 'settings', icon: 'sliders', label: 'Configuración' }} />
+
+      <View style={styles.divider} />
+
+      {/* Footer: avatar + user info */}
       <View style={styles.footer}>
-        <View style={styles.avatarDot} />
+        <View style={styles.avatar}>
+          <Text style={styles.avatarText}>{getInitials(user?.username ?? '')}</Text>
+        </View>
         {hovered && (
           <View style={styles.footerRight}>
             <Text style={styles.footerUser}>{user?.username ?? ''}</Text>
@@ -82,13 +107,11 @@ export function Sidebar({ active, onChange }: SidebarProps) {
         )}
       </View>
 
-      <Pressable
-        style={styles.logoutBtn}
-        onPress={logout}
-        // @ts-ignore
-        title="Cerrar sesión"
-      >
-        <Text style={styles.logoutIcon}>⏻</Text>
+      {/* Logout */}
+      <Pressable style={styles.navItem} onPress={logout}>
+        <View style={styles.iconWrap}>
+          <NavIcon name="log-out" size={18} color="rgba(255,255,255,0.35)" />
+        </View>
         {hovered && <Text style={styles.logoutText}>Cerrar sesión</Text>}
       </Pressable>
     </View>
@@ -148,14 +171,11 @@ const styles = StyleSheet.create({
   navItemActive: {
     backgroundColor: 'rgba(197,216,109,0.15)',
   },
-  navIcon: {
-    fontSize: 18,
+  iconWrap: {
     width: 24,
-    textAlign: 'center',
-    color: 'rgba(255,255,255,0.45)',
-  },
-  navIconActive: {
-    color: Colors.lime,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   navLabel: {
     fontSize: 13,
@@ -165,6 +185,17 @@ const styles = StyleSheet.create({
   navLabelActive: {
     color: Colors.cream,
     fontWeight: '600',
+  },
+  sectionLabel: {
+    fontSize: 9,
+    fontFamily: Fonts.sans,
+    fontWeight: '700',
+    color: 'rgba(255,255,255,0.28)',
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    paddingHorizontal: 24,
+    paddingBottom: 4,
+    paddingTop: 2,
   },
   footer: {
     flexDirection: 'row',
@@ -176,11 +207,19 @@ const styles = StyleSheet.create({
     borderTopColor: 'rgba(255,255,255,0.08)',
     marginBottom: 4,
   },
-  avatarDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: Colors.greenSoft,
+  avatar: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: Colors.lime,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: Colors.greenDeeper,
+    fontFamily: Fonts.sans,
   },
   footerRight: { gap: 1 },
   footerUser: {
@@ -193,22 +232,6 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: 'rgba(255,255,255,0.35)',
     fontFamily: Fonts.mono,
-  },
-  logoutBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Space.sm,
-    paddingVertical: 8,
-    paddingHorizontal: 20,
-    marginHorizontal: 8,
-    borderRadius: Radius.md,
-    marginBottom: 2,
-  },
-  logoutIcon: {
-    fontSize: 16,
-    width: 24,
-    textAlign: 'center',
-    color: 'rgba(255,255,255,0.35)',
   },
   logoutText: {
     fontSize: 12,

@@ -91,6 +91,7 @@ export function Records() {
   const [showFilters, setShowFilters] = useState(false);
   const [adv, setAdv]               = useState<AdvancedFilters>({});
   const [showAdd, setShowAdd]       = useState(false);
+  const [exporting, setExporting]   = useState(false);
 
   const activeCount = Object.values(adv).filter(v => v !== undefined && v !== '' && v !== false).length;
 
@@ -153,6 +154,28 @@ export function Records() {
     setAdv({});
   }
 
+  async function handleExport() {
+    setExporting(true);
+    try {
+      const params: OccurrenceFilter = {
+        ...(collection !== 'Todos' && { collection_code: collection }),
+        ...(search.trim() && { taxon: search.trim() }),
+        ...(adv.state_province?.trim()   && { state_province: adv.state_province.trim() }),
+        ...(adv.disposition              && { disposition: adv.disposition }),
+        ...(adv.identified_by?.trim()    && { identified_by: adv.identified_by.trim() }),
+        ...(adv.verification_status      && { verification_status: adv.verification_status }),
+        ...(adv.con_coordenadas          && { con_coordenadas: true }),
+        ...(adv.year_from && !isNaN(Number(adv.year_from)) && { year_from: Number(adv.year_from) }),
+        ...(adv.year_to   && !isNaN(Number(adv.year_to))   && { year_to:   Number(adv.year_to) }),
+      };
+      await api.exportOccurrences(params);
+    } catch {
+      // silent — user will see nothing was downloaded
+    } finally {
+      setExporting(false);
+    }
+  }
+
   const subtitle = `${data.length}${hasMore ? '+' : ''} registros${collection !== 'Todos' ? ` · ${collection}` : ''}`;
 
   return (
@@ -177,6 +200,12 @@ export function Records() {
           ))}
         </View>
         <View style={styles.rightActions}>
+          <Pressable onPress={handleExport} disabled={exporting} style={styles.exportBtn}>
+            {exporting
+              ? <ActivityIndicator size="small" color={Colors.greenDeep} />
+              : <Text style={styles.exportBtnText}>↓ CSV</Text>
+            }
+          </Pressable>
           <Pressable onPress={() => setShowAdd(true)} style={styles.addBtn}>
             <Text style={styles.addBtnText}>+ Nuevo</Text>
           </Pressable>
@@ -362,6 +391,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Space.sm,
+  },
+  exportBtn: {
+    paddingVertical: 6, paddingHorizontal: Space.md,
+    borderRadius: Radius.md,
+    borderWidth: 1, borderColor: Colors.line,
+    backgroundColor: Colors.surface2,
+    minWidth: 60,
+    alignItems: 'center',
+  },
+  exportBtnText: {
+    fontSize: 12,
+    fontFamily: Fonts.sans,
+    fontWeight: '600',
+    color: Colors.ink2,
   },
   addBtn: {
     paddingVertical: 6, paddingHorizontal: Space.md,
