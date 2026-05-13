@@ -37,7 +37,7 @@ function AppShell() {
         {screen === 'records'    && <Records />}
         {screen === 'admin'      && isAdmin && <AdminPanel />}
         {screen === 'taxonomia'  && <Taxonomia />}
-        {screen === 'cartografia'&& <Cartografia />}
+        {screen === 'cartografia'&& <Cartografia onNavigate={s => setScreen(s)} />}
         {screen === 'settings'   && <Settings />}
       </View>
       <ToastContainer />

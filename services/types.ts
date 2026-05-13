@@ -85,3 +85,15 @@ export interface UserRecord {
   is_active: boolean;
   email?:    string;
 }
+
+export interface MapPoint {
+  lat:            number;
+  lng:            number;
+  occurrenceId?:  string;
+  catalogNumber?: string;
+  disposition?:   string;
+  scientificName?: string;
+  family?:        string;
+  taxonOrder?:    string;
+  stateProvince?: string;
+}

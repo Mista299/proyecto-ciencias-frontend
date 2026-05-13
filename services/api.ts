@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Occurrence, QualityStats, MappingReport, ETLResult, TaxonResumen, AuthUser, UserRecord } from './types';
+import { Occurrence, QualityStats, MappingReport, ETLResult, TaxonResumen, AuthUser, UserRecord, MapPoint } from './types';
 
 const STORAGE_KEY = 'mua_auth_token';
 const BASE = 'http://localhost:8000';
@@ -62,6 +62,9 @@ export const api = {
 
   getDistribucion: () =>
     http.get<{ country: string; count: number }[]>('/stats/distribucion-geografica').then(r => r.data),
+
+  getMapa: () =>
+    http.get<MapPoint[]>('/stats/mapa').then(r => r.data),
 
   previsualizarMapeo: (file: File) => {
     const form = new FormData();

@@ -7,6 +7,7 @@ import { SpecimenModal } from '../components/SpecimenModal';
 import { AddOccurrenceModal } from '../components/AddOccurrenceModal';
 import { api, OccurrenceFilter } from '../services/api';
 import { Occurrence } from '../services/types';
+import { nav } from '../services/navigation';
 
 const COLLECTIONS = ['Todos', 'MUA-MAM', 'MUA-ANF', 'MUA-AVE', 'MUA-REP'];
 const DISPOSITIONS = ['', 'En colección', 'Extraviado'];
@@ -135,6 +136,13 @@ export function Records() {
     setHasMore(true);
     load(true);
   }, [collection, search, adv]);
+
+  // Open a specific record when navigating from the map
+  useEffect(() => {
+    const id = nav.consumeRecord();
+    if (!id) return;
+    api.getOccurrence(id).then(setSelected).catch(() => {});
+  }, []);
 
   function handleSaved(updated: Occurrence) {
     setData(prev => prev.map(o => o.occurrenceID === updated.occurrenceID ? updated : o));
