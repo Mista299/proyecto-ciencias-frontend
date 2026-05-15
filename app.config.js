@@ -1,5 +1,10 @@
 const appJson = require('./app.json');
 
+// Load local .env in development if dotenv is available
+try {
+  require('dotenv').config();
+} catch (e) {}
+
 // app.config.js reads environment variables at build time and injects them into expo.extra
 module.exports = () => {
   return {

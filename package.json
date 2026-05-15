@@ -45,6 +45,7 @@
     "@babel/core": "^7.25.2",
     "@babel/preset-env": "^7.29.5",
     "@types/react": "~18.3.12",
+    "dotenv": "^17.4.2",
     "electron": "^42.0.0",
     "electron-builder": "^26.8.1",
     "typescript": "^5.3.3"
