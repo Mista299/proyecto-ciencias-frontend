@@ -1,6 +1,6 @@
 {
   "installCommand": "ELECTRON_SKIP_BINARY_DOWNLOAD=1 npm install",
-  "buildCommand": "npx expo export -p web --non-interactive",
+  "buildCommand": "CI=1 npx expo export -p web",
   "outputDirectory": "dist",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }

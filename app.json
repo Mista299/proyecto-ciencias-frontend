@@ -6,8 +6,8 @@
     "orientation": "portrait",
     "platforms": ["web"],
     "web": {
-      "bundler": "webpack",
-      "output": "static",
+      "bundler": "metro",
+      "output": "single",
       "favicon": "./assets/favicon.png"
     }
   }
