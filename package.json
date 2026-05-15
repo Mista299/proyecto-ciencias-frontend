@@ -7,7 +7,7 @@
     "web": "expo start --web",
     "electron": "electron electron.js",
     "dist": "PUBLIC_URL=. node_modules/.bin/expo export:web && node_modules/.bin/electron-builder --linux",
-    "build:web": "PUBLIC_URL=. npx expo export:web --output web-build --non-interactive"
+    "build:web": "npx expo export -p web --non-interactive"
   },
   "build": {
     "appId": "co.udea.mua.biodiversidad",
@@ -29,7 +29,6 @@
     }
   },
   "dependencies": {
-    "@expo/webpack-config": "^19.0.1",
     "axios": "^1.7.9",
     "expo": "~52.0.36",
     "expo-document-picker": "~13.0.2",
