@@ -1,4 +1,6 @@
 {
+  "buildCommand": "PUBLIC_URL=. npx expo export:web --output web-build --non-interactive",
+  "outputDirectory": "web-build",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
