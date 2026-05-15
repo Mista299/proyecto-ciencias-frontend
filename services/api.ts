@@ -2,7 +2,7 @@ import axios from 'axios';
 import { Occurrence, QualityStats, MappingReport, ETLResult, TaxonResumen, AuthUser, UserRecord, MapPoint } from './types';
 
 const STORAGE_KEY = 'mua_auth_token';
-const BASE = 'http://localhost:8000';
+const BASE = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8000';
 const http = axios.create({ baseURL: BASE });
 
 http.interceptors.request.use(config => {
