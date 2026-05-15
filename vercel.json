@@ -1,4 +1,5 @@
 {
+  "installCommand": "ELECTRON_SKIP_BINARY_DOWNLOAD=1 npm install",
   "buildCommand": "PUBLIC_URL=. npx expo export:web --output web-build --non-interactive",
   "outputDirectory": "web-build",
   "rewrites": [
