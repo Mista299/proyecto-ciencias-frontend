@@ -6,7 +6,8 @@
     "start": "expo start",
     "web": "expo start --web",
     "electron": "electron electron.js",
-    "dist": "PUBLIC_URL=. node_modules/.bin/expo export:web && node_modules/.bin/electron-builder --linux"
+    "dist": "PUBLIC_URL=. node_modules/.bin/expo export:web && node_modules/.bin/electron-builder --linux",
+    "build:web": "PUBLIC_URL=. npx expo export:web --output web-build --non-interactive"
   },
   "build": {
     "appId": "co.udea.mua.biodiversidad",
